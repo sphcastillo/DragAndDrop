@@ -13,7 +13,7 @@ const initialData = {
         },
     },
     // Facilitates reordering of the columns
-    coloumnOrder: ['column-1'],
+    columnOrder: ['column-1'],
 };
 
 export default initialData;
