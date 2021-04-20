@@ -7,12 +7,10 @@ const Container = styled.div`
   margin: 8px;
   border: 1px solid lightgrey;
   border-radius: 2px;
-  width: 220px;
 
   display: flex;
   flex-direction: column;
 `;
-
 const Title = styled.h3`
   padding: 8px;
 `;
@@ -21,7 +19,8 @@ const TaskList = styled.div`
   transition: background-color 0.2s ease;
   background-color: ${props => (props.isDraggingOver ? 'skyblue' : 'white')};
   flex-grow: 1;
-  min-height: 100px;
+
+  display: flex;
 `;
 
 export default class Column extends React.Component {
@@ -29,13 +28,10 @@ export default class Column extends React.Component {
     return (
       <Container>
         <Title>{this.props.column.title}</Title>
-        <Droppable 
-          droppableId={this.props.column.id}
-          isDropDisabled={this.props.isDropDisabled}
-        >
+        <Droppable droppableId={this.props.column.id} direction="horizontal">
           {(provided, snapshot) => (
-            <TaskList 
-              ref={provided.innerRef} 
+            <TaskList
+              ref={provided.innerRef}
               {...provided.droppableProps}
               isDraggingOver={snapshot.isDraggingOver}
             >
@@ -44,7 +40,7 @@ export default class Column extends React.Component {
               ))}
               {provided.placeholder}
             </TaskList>
-           )}
+          )}
         </Droppable>
       </Container>
     );

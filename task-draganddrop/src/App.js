@@ -6,134 +6,94 @@ import initialData from './initial-data';
 import Column from './components/Column';
 
 const Container = styled.div`
-    display: flex;
+  display: flex;
 `;
 
-
 class App extends React.Component {
-    state = initialData;
+  state = initialData;
 
-    // onDragStart = () => {
-    //     document.body.style.color = 'orange';
-    //     document.body.style.transition = 'background-color 0.2s ease';
-    // }
+  onDragEnd = result => {
+    const { destination, source, draggableId } = result;
 
-    onDragStart = start => {
-        const homeIndex = this.state.columnOrder.indexOf(start.source.droppableId);
-
-        this.setState({
-            homeIndex,
-        })
+    if (!destination) {
+      return;
     }
 
-    // onDragUpdate = update => {
-    //     const { destination } = update;
-    //     const opacity = destination
-    //     ? destination.index / Object.keys(this.state.tasks).length
-    //     : 0;
-    //     document.body.style.backgroundColor = `rgba(153, 141, 217, ${opacity})`;
-    // }
+    if (
+      destination.droppableId === source.droppableId &&
+      destination.index === source.index
+    ) {
+      return;
+    }
 
-    onDragEnd = result => {
+    const home = this.state.columns[source.droppableId];
+    const foreign = this.state.columns[destination.droppableId];
 
-        this.setState({
-            homeIndex: null,
-        });
+    if (home === foreign) {
+      const newTaskIds = Array.from(home.taskIds);
+      newTaskIds.splice(source.index, 1);
+      newTaskIds.splice(destination.index, 0, draggableId);
 
-        const { destination, source, draggableId } = result;
-    
-        if (!destination) {
-          return;
-        }
-    
-        if (
-          destination.droppableId === source.droppableId &&
-          destination.index === source.index
-        ) {
-          return;
-        }
-    
-        const start = this.state.columns[source.droppableId];
-        const finish = this.state.columns[destination.droppableId];
-    
-        if (start === finish) {
-          const newTaskIds = Array.from(start.taskIds);
-          newTaskIds.splice(source.index, 1);
-          newTaskIds.splice(destination.index, 0, draggableId);
-    
-          const newColumn = {
-            ...start,
-            taskIds: newTaskIds,
-          };
-    
-          const newState = {
-            ...this.state,
-            columns: {
-              ...this.state.columns,
-              [newColumn.id]: newColumn,
-            },
-          };
-    
-          this.setState(newState);
-          return;
-        }
-    
-        // Moving from one list to another
-        const startTaskIds = Array.from(start.taskIds);
-        startTaskIds.splice(source.index, 1);
-        const newStart = {
-          ...start,
-          taskIds: startTaskIds,
-        };
-    
-        const finishTaskIds = Array.from(finish.taskIds);
-        finishTaskIds.splice(destination.index, 0, draggableId);
-        const newFinish = {
-          ...finish,
-          taskIds: finishTaskIds,
-        };
-    
-        const newState = {
-          ...this.state,
-          columns: {
-            ...this.state.columns,
-            [newStart.id]: newStart,
-            [newFinish.id]: newFinish,
-          },
-        };
-        this.setState(newState);
+      const newHome = {
+        ...home,
+        taskIds: newTaskIds,
       };
 
+      const newState = {
+        ...this.state,
+        columns: {
+          ...this.state.columns,
+          [newHome.id]: newHome,
+        },
+      };
 
-    render(){
-        return(
-            <DragDropContext 
-                onDragStart={this.onDragStart}
-                // onDragUpdate={this.onDragUpdate}
-                onDragEnd={this.onDragEnd}
-            >
-                <Container>
-                    {this.state.columnOrder.map((columnId, index) => {
-                        const column = this.state.columns[columnId];
-                        const tasks = column.taskIds.map(
-                            taskId => this.state.tasks[taskId],
-                        );
-
-                        const isDropDisabled = index < this.state.homeIndex;
-    
-                        return (
-                            <Column 
-                                key={column.id} 
-                                column={column} 
-                                tasks={tasks} 
-                                isDropDisabled={isDropDisabled}
-                            />
-                        );
-                    })}
-                </Container>
-          </DragDropContext>
-        )
+      this.setState(newState);
+      return;
     }
+
+    // moving from one list to another
+    const homeTaskIds = Array.from(home.taskIds);
+    homeTaskIds.splice(source.index, 1);
+    const newHome = {
+      ...home,
+      taskIds: homeTaskIds,
+    };
+
+    const foreignTaskIds = Array.from(foreign.taskIds);
+    foreignTaskIds.splice(destination.index, 0, draggableId);
+    const newForeign = {
+      ...foreign,
+      taskIds: foreignTaskIds,
+    };
+
+    const newState = {
+      ...this.state,
+      columns: {
+        ...this.state.columns,
+        [newHome.id]: newHome,
+        [newForeign.id]: newForeign,
+      },
+    };
+    this.setState(newState);
+  };
+
+  render() {
+    return (
+      <DragDropContext onDragEnd={this.onDragEnd}>
+        <Container>
+          {this.state.columnOrder.map(columnId => {
+            const column = this.state.columns[columnId];
+            const tasks = column.taskIds.map(
+              taskId => this.state.tasks[taskId],
+            );
+
+            return <Column key={column.id} column={column} tasks={tasks} />;
+          })}
+        </Container>
+      </DragDropContext>
+    );
+  }
 }
+
 
 export default App;
