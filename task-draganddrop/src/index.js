@@ -8,8 +8,15 @@ import Column from './column';
 class App extends React.Component {
   state = initialData;
 
-  onDragEnd = result => {
+  onDragEnd = ({source, destination}) => {
     // TODO: reorder our column
+    console.log(source.index, destination.index);
+    //change source in array's index to destination
+
+    const slicedEle = this.state.tasks[source.index];
+    const data = this.state.tasks.map((a,i)=> i === source.index ? 0 : a);
+    data.splice(destination.index, 0, slicedEle);
+    this.setState(data.filter(a => a));
   };
 
   render() {
